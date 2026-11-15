@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "strict": true,
+    "skipLibCheck": true,
+    "outDir": ".test-build",
+    "rootDir": ".",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "./*"
+      ]
+    }
+  },
+  "files": [
+    "lib/crm/leads.ts",
+    "lib/crm/display-names.ts",
+    "lib/crm/export-utils.ts",
+    "lib/crm/permissions.ts"
+  ]
+}
