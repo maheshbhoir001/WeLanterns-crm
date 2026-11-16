@@ -1,8 +1,6 @@
 import {NextRequest,NextResponse} from "next/server";
 import {getWhatsAppAdminClient} from "@/lib/whatsapp/admin";
 import {buildWelcomeMessage,classifyInboundText,isFinancialAdviceRequest,nextRetryAt,routeForService} from "@/lib/whatsapp/domain";
-export const runtime="nodejs";
-export const dynamic="force-dynamic";
 const BATCH=50;
 async function queueReply(db:any,conversationId:string,to:string,body:string){
  const {error}=await db.from("whatsapp_outbox").insert({conversation_id:conversationId,recipient_wa_id:to,body,message_type:"text"});
