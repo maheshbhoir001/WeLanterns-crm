@@ -18,6 +18,7 @@
     "lib/crm/leads.ts",
     "lib/crm/display-names.ts",
     "lib/crm/export-utils.ts",
-    "lib/crm/permissions.ts"
+    "lib/crm/permissions.ts",
+    "lib/whatsapp/domain.ts"
   ]
 }
