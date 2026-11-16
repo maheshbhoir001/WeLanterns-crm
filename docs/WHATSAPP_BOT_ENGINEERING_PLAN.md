@@ -78,7 +78,7 @@ Acceptance targets: webhook p95 < 500 ms; zero lost accepted events; idempotent 
 - The first qualification flow collects service and requirement; name/callback details and robust multi-turn state need completion.
 - Approved WhatsApp templates and template sending outside the 24-hour service window are not yet implemented.
 - Delivery retries, stale worker lock recovery, queue alerting, dead-letter review and webhook event retention/PII cleanup need hardening.
-- The service window is stored; outbound worker still needs enforcement that free-form messages are sent only inside the customer-service window, otherwise only approved templates are allowed. Until this guard is added, do not schedule automated outbound campaigns.
+- Outbound free-form messages are cancelled when the recorded 24-hour customer-service window has expired. Approved template creation and sending are not yet implemented, so proactive follow-ups must remain disabled.
 - The current app needs real Meta credentials before any live message can be sent.
 
 ## Privacy and financial-services guardrails
