@@ -7,7 +7,7 @@ import {
   isWithinCustomerServiceWindow,
   canSendFreeformReply,
   isFinancialAdviceRequest,
-  routeForService,
+  routeForService,\n  nextRetryAt,
 } from "../../.test-build/lib/whatsapp/domain.js";
 
 test("normalizes customer input without throwing on missing text", () => {
@@ -51,4 +51,11 @@ test("service selection maps to known vertical and product", () => {
   assert.deepEqual(routeForService("1"), { vertical: "WeLanterns Capital", product: "Mutual Funds & SIP" });
   assert.deepEqual(routeForService("5"), { vertical: "SME Advisory", product: "SME Advisory" });
   assert.equal(routeForService("99"), null);
+});
+
+test("retry schedule is bounded and increases with attempts", () => {
+  const now = Date.parse("2026-11-16T12:00:00.000Z");
+  assert.equal(nextRetryAt(1, now), new Date(now + 60_000).toISOString());
+  assert.equal(nextRetryAt(2, now), new Date(now + 120_000).toISOString());
+  assert.equal(nextRetryAt(99, now), new Date(now + 60 * 60 * 1000).toISOString());
 });
