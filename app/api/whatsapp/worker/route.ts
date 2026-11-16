@@ -17,7 +17,11 @@ async function inbound(db:any,event:any){
  if(c.error||!c.data)throw c.error??new Error("Contact upsert failed");
  let q=await db.from("whatsapp_conversations").select("id,status,bot_enabled").eq("contact_id",c.data.id).in("status",["open","handed_off"]).order("updated_at",{ascending:false}).limit(1).maybeSingle();
  if(q.error)throw q.error;
- if(!q.data){q=await db.from("whatsapp_conversations").insert({contact_id:c.data.id,status:"open",bot_enabled:true}).select("id,status,bot_enabled").single();if(q.error||!q.data)throw q.error??new Error("Conversation create failed")}
+ if(!q.data){
+  q=await db.from("whatsapp_conversations").insert({contact_id:c.data.id,status:"open",bot_enabled:true}).select("id,status,bot_enabled").single();
+  if(q.error?.code==="23505") q=await db.from("whatsapp_conversations").select("id,status,bot_enabled").eq("contact_id",c.data.id).in("status",["open","handed_off"]).maybeSingle();
+  if(q.error||!q.data)throw q.error??new Error("Conversation create failed")
+ }
  const conv=q.data;
  const m=await db.from("whatsapp_messages").upsert({conversation_id:conv.id,wa_message_id:message.id,direction:"inbound",message_type:message.type??"unknown",body:body||"["+String(message.type??"unsupported")+" message]",delivery_status:"received",raw_payload:message},{onConflict:"wa_message_id",ignoreDuplicates:true});
  if(m.error)throw m.error;
@@ -52,6 +56,13 @@ async function inbound(db:any,event:any){
  return queueReply(db,conv.id,waId,buildWelcomeMessage());
 }
 async function send(db:any,item:any){
+ const conversation=await db.from("whatsapp_conversations").select("service_window_expires_at").eq("id",item.conversation_id).maybeSingle();
+ if(conversation.error)throw conversation.error;
+ const expires=conversation.data?.service_window_expires_at?Date.parse(conversation.data.service_window_expires_at):0;
+ if(!Number.isFinite(expires)||expires<=Date.now()){
+  await db.from("whatsapp_outbox").update({status:"cancelled",last_error:"Customer service window expired; an approved template is required.",locked_at:null,updated_at:new Date().toISOString()}).eq("id",item.id);
+  return false;
+ }
  const token=process.env.WHATSAPP_ACCESS_TOKEN,phone=process.env.WHATSAPP_PHONE_NUMBER_ID,version=process.env.WHATSAPP_API_VERSION;
  if(!token||!phone||!version)throw new Error("Meta Cloud API credentials are not configured");
  const r=await fetch("https://graph.facebook.com/"+version+"/"+phone+"/messages",{method:"POST",headers:{Authorization:"Bearer "+token,"Content-Type":"application/json"},body:JSON.stringify({messaging_product:"whatsapp",recipient_type:"individual",to:item.recipient_wa_id,type:"text",text:{preview_url:false,body:item.body}}),cache:"no-store"});
