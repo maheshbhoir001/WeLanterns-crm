@@ -1,8 +1,6 @@
 import {createHmac,timingSafeEqual} from "node:crypto";
 import {NextRequest,NextResponse} from "next/server";
 import {getWhatsAppAdminClient} from "@/lib/whatsapp/admin";
-export const runtime="nodejs";
-export const dynamic="force-dynamic";
 function verify(raw:string,sig:string|null){
  const secret=process.env.META_APP_SECRET;
  if(!secret||!sig?.startsWith("sha256="))return false;
