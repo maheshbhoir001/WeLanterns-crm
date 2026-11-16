@@ -234,3 +234,25 @@ Do not production-launch until:
 ## Recommended product choice
 
 Keep Mahesh's existing number in WhatsApp Business App only if Meta confirms Coexistence eligibility and its behavior suits the personal/client separation. Otherwise, use a dedicated WeLanterns business number and keep personal WhatsApp untouched. Even with Coexistence, default all contacts to private/human-only until they have a recorded permission for automated business support.
+
+
+## Implementation status — privacy-first hold (16 November 2026)
+
+The initial prototype has been changed to fail closed:
+- `WHATSAPP_WEBHOOK_INGEST_ENABLED` must be exactly `true` before verified webhook events are persisted. When unset or false, the webhook acknowledges Meta but does not store message payloads.
+- `WHATSAPP_BOT_ENABLED` must be exactly `true` before the worker claims events or sends outbound messages. When unset or false, the worker returns a paused response.
+- Both flags must remain unset/false until the remaining release gates below pass.
+- Coexistence message echoes are not yet ingested; a dedicated audit-only path and tests are still required.
+- This is a protective kill switch, not a completed privacy-mode implementation. It does not itself provide per-contact private/human-only/assistant-enabled modes, consent evidence, human takeover locking, or a verified Coexistence integration.
+
+### Remaining implementation gates
+1. Inspect and safely extend the existing staging schema for contact mode, consent evidence, audit history and human ownership. Do not apply changes to production.
+2. Implement the contact-mode check before any message-body persistence, CRM sync, AI processing or outbound queue insertion.
+3. Add explicit opt-in notice and affirmative consent capture; existing contacts remain human-only/private by default.
+4. Implement STOP withdrawal, separate marketing consent, echo suppression and atomic human takeover.
+5. Add shared inbox controls and audit trail.
+6. Confirm exact AI use with Meta/qualified Indian counsel before enabling AI processing of WhatsApp Business Solution Data.
+7. Verify the same-number Coexistence eligibility in Meta Embedded Signup, inspect all sync/echo implications, and only then consider enabling the webhook.
+8. Run staging-only integration, security, recovery and load tests. Production remains untouched.
+
+No phone number has been onboarded, migrated, deregistered or changed. No production database migration has been applied.
