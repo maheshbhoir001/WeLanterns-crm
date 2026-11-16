@@ -72,7 +72,7 @@ async function send(db:any,item:any){
  return true;
 }
 export async function POST(req:NextRequest){
- const secret=process.env.WHATSAPP_WORKER_SECRET;
+ // Fail closed: no event processing or outbound sends until privacy, consent,\n // coexistence echo handling and Meta policy gates are explicitly released.\n if(process.env.WHATSAPP_BOT_ENABLED!=="true")return NextResponse.json({paused:true,reason:"privacy_gate_not_released"});\n const secret=process.env.WHATSAPP_WORKER_SECRET;
  if(!secret||req.headers.get("authorization")!=="Bearer "+secret)return NextResponse.json({error:"Unauthorized"},{status:401});
  const db=getWhatsAppAdminClient(),claim=await db.rpc("claim_whatsapp_events",{batch_size:BATCH});
  if(claim.error)return NextResponse.json({error:"Event queue unavailable"},{status:500});
