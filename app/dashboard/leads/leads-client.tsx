@@ -21,6 +21,11 @@ import {
 
 type LeadForm = {
   name: string;
+  contactPerson: string;
+  contactDesignation: string;
+  businessAddress: string;
+  website: string;
+  contactVerificationStatus: string;
   phone: string;
   email: string;
   vertical: string;
@@ -44,6 +49,11 @@ type AuditEvent = {
 
 const emptyForm: LeadForm = {
   name: "",
+  contactPerson: "",
+  contactDesignation: "",
+  businessAddress: "",
+  website: "",
+  contactVerificationStatus: "Unverified",
   phone: "",
   email: "",
   vertical: "",
@@ -171,6 +181,11 @@ export default function LeadsClient({
     setEditingId(lead.id);
     setForm({
       name: lead.name || "",
+      contactPerson: lead.contact_person || "",
+      contactDesignation: lead.contact_designation || "",
+      businessAddress: lead.business_address || "",
+      website: lead.website || "",
+      contactVerificationStatus: lead.contact_verification_status || "Unverified",
       phone: lead.phone || "",
       email: lead.email || "",
       vertical: lead.vertical || availableVerticals[0] || "",
@@ -304,6 +319,11 @@ export default function LeadsClient({
     const owner = profiles.find((profile) => profile.id === form.ownerId);
     const payload = {
       name: form.name.trim(),
+      contact_person: form.contactPerson.trim() || null,
+      contact_designation: form.contactDesignation.trim() || null,
+      business_address: form.businessAddress.trim() || null,
+      website: form.website.trim() || null,
+      contact_verification_status: form.contactVerificationStatus,
       phone: form.phone.trim(),
       email: form.email.trim() || null,
       vertical: form.vertical,
@@ -449,7 +469,7 @@ export default function LeadsClient({
           <form onSubmit={saveLead} className="space-y-5 rounded-xl bg-white p-5 shadow-sm md:p-7">
             <div>
               <h2 className="text-xl font-bold text-slate-900">{editingId ? "Edit lead" : "New lead / opportunity"}</h2>
-              <p className="mt-1 text-sm text-slate-500">Name and mobile are required. Other details can be completed later.</p>
+              <p className="mt-1 text-sm text-slate-500">Company name is required. Add decision-maker and contact details when verified.</p>
               {verticalsLoading && <p role="status" className="mt-1 text-sm text-slate-600">Loading active business verticals…</p>}
               {verticalsError && <div role="alert" className="mt-2 flex flex-wrap items-center gap-3 text-sm text-red-700"><span>{verticalsError}</span><button type="button" onClick={() => void reloadVerticals()} className="font-semibold underline">Retry</button></div>}
             </div>
@@ -457,6 +477,23 @@ export default function LeadsClient({
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <label className={labelClass}>Client name *
                 <input className={inputClass} required maxLength={160} value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} />
+              </label>
+              <label className={labelClass}>Contact person
+                <input className={inputClass} maxLength={120} value={form.contactPerson} onChange={(event) => setForm({ ...form, contactPerson: event.target.value })} placeholder="Owner / director / finance head" />
+              </label>
+              <label className={labelClass}>Designation
+                <input className={inputClass} maxLength={120} value={form.contactDesignation} onChange={(event) => setForm({ ...form, contactDesignation: event.target.value })} placeholder="Managing Director, CFO, etc." />
+              </label>
+              <label className={labelClass}>Business address
+                <input className={inputClass} maxLength={500} value={form.businessAddress} onChange={(event) => setForm({ ...form, businessAddress: event.target.value })} />
+              </label>
+              <label className={labelClass}>Website
+                <input className={inputClass} type="url" maxLength={300} value={form.website} onChange={(event) => setForm({ ...form, website: event.target.value })} placeholder="https://" />
+              </label>
+              <label className={labelClass}>Contact verification
+                <select className={inputClass} value={form.contactVerificationStatus} onChange={(event) => setForm({ ...form, contactVerificationStatus: event.target.value })}>
+                  {["Unverified", "Public listing", "Official source checked", "Directly confirmed"].map((status) => <option key={status}>{status}</option>)}
+                </select>
               </label>
               <label className={labelClass}>Mobile number (optional)
                 <input className={inputClass} type="tel" maxLength={32} value={form.phone} onChange={(event) => setForm({ ...form, phone: event.target.value })} />
@@ -573,7 +610,7 @@ export default function LeadsClient({
                   return (
                     <Fragment key={lead.id}>
                       <tr className="border-b border-slate-100 align-top hover:bg-slate-50">
-                        <td className="px-3 py-3 font-semibold text-slate-900">{lead.name}<div className="mt-1 text-xs font-normal text-slate-500">{lead.email || ""}</div></td>
+                        <td className="px-3 py-3 font-semibold text-slate-900">{lead.name}<div className="mt-1 text-xs font-normal text-slate-600">{lead.contact_person ? `${lead.contact_person}${lead.contact_designation ? ` · ${lead.contact_designation}` : ""}` : "Decision-maker not identified"}</div><div className="mt-1 text-xs font-normal text-slate-500">{lead.email || ""}</div><div className="mt-1 text-[11px] font-normal text-slate-400">{lead.contact_verification_status || "Unverified"}</div></td>
                         <td className="px-3 py-3">
                           <div className="font-medium text-slate-800">{lead.phone}</div>
                           <div className="mt-1 flex gap-3 text-xs font-semibold">
