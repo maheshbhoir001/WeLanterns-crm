@@ -17,6 +17,11 @@ export type LeadRole = "super_admin" | "group_admin" | "employee";
 export type Lead = {
   id: string;
   name: string;
+  contact_person?: string | null;
+  contact_designation?: string | null;
+  business_address?: string | null;
+  website?: string | null;
+  contact_verification_status?: string;
   phone: string;
   client_id?: string | null;
   email: string | null;
