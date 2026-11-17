@@ -290,8 +290,8 @@ export default function LeadsClient({
       return;
     }
     const expectedValue = form.value.trim() ? Number(form.value) : 0;
-    if (!form.name.trim() || !form.phone.trim()) {
-      setMessage({ kind: "error", text: "Enter a client name and mobile number." });
+    if (!form.name.trim()) {
+      setMessage({ kind: "error", text: "Enter a company or client name. Add a phone number after verifying the correct contact." });
       return;
     }
     if (!Number.isFinite(expectedValue) || expectedValue < 0 || Math.round(expectedValue * 100) !== expectedValue * 100) {
@@ -458,8 +458,8 @@ export default function LeadsClient({
               <label className={labelClass}>Client name *
                 <input className={inputClass} required maxLength={160} value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} />
               </label>
-              <label className={labelClass}>Mobile number *
-                <input className={inputClass} required type="tel" maxLength={32} value={form.phone} onChange={(event) => setForm({ ...form, phone: event.target.value })} />
+              <label className={labelClass}>Mobile number (optional)
+                <input className={inputClass} type="tel" maxLength={32} value={form.phone} onChange={(event) => setForm({ ...form, phone: event.target.value })} />
               </label>
               <label className={labelClass}>Email
                 <input className={inputClass} type="email" maxLength={254} value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} />
@@ -578,7 +578,7 @@ export default function LeadsClient({
                           <div className="font-medium text-slate-800">{lead.phone}</div>
                           <div className="mt-1 flex gap-3 text-xs font-semibold">
                             {links.telephone && <a href={links.telephone} className="text-blue-700">Call</a>}
-                            {links.whatsapp && <a href={links.whatsapp} target="_blank" rel="noreferrer" className="text-emerald-700">WhatsApp</a>}
+                            {links.whatsapp && /WHATSAPP OPT-IN: (YES|TRUE|CONSENTED)/i.test(lead.notes || "") && <a href={links.whatsapp} target="_blank" rel="noreferrer" className="text-emerald-700">WhatsApp (opted-in)</a>}
                           </div>
                         </td>
                         <td className="px-3 py-3">{lead.product || "—"}</td>
